@@ -67,6 +67,7 @@ const program = Effect.gen(function* () {
               newRes === 0 ? Ref.update(pass, (p) => p + 1) : Effect.void,
             ),
           ),
+        discard: true,
       });
 
       if (
