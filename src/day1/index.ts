@@ -1,29 +1,6 @@
-import { FileSystem, Path } from "@effect/platform";
-import { BunContext, BunRuntime } from "@effect/platform-bun";
-import {
-  Array,
-  Data,
-  Effect,
-  Layer,
-  Number,
-  Option,
-  Ref,
-  String,
-} from "effect";
+import { Array, Data, Effect, Number, Option, Ref, String } from "effect";
 import { Direction } from "effect/RedBlackTree";
-
-class ProblemInput extends Effect.Service<ProblemInput>()("ProblemInput", {
-  effect: Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
-    const p = yield* Path.Path;
-    const sample = yield* fs.readFileString(
-      p.join(import.meta.dir, "input.txt"),
-    );
-
-    return { sample };
-  }),
-  accessors: true,
-}) {}
+import { ProblemInput, Runtime } from "../utils";
 
 type Direction = Data.TaggedEnum<{
   Left: {};
@@ -33,7 +10,7 @@ type Direction = Data.TaggedEnum<{
 const { $match, Left, Right } = Data.taggedEnum<Direction>();
 
 const program = Effect.gen(function* () {
-  const input = yield* ProblemInput.sample;
+  const input = yield* ProblemInput.read("sample.txt", "day1");
 
   const pos = yield* Ref.make(50);
   const pass = yield* Ref.make(0);
@@ -64,8 +41,4 @@ const program = Effect.gen(function* () {
   yield* Effect.log(yield* Ref.get(pass));
 });
 
-const Dependencies = ProblemInput.Default.pipe(
-  Layer.provideMerge(BunContext.layer),
-);
-
-BunRuntime.runMain(program.pipe(Effect.provide(Dependencies)));
+Runtime.runPromise(program);

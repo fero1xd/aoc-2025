@@ -1,19 +1,5 @@
-import { FileSystem, Path } from "@effect/platform";
-import { BunContext, BunRuntime } from "@effect/platform-bun";
-import { Array, Effect, Layer, Number, Option, String } from "effect";
-
-class ProblemInput extends Effect.Service<ProblemInput>()("ProblemInput", {
-  effect: Effect.gen(function* () {
-    const fs = yield* FileSystem.FileSystem;
-    const p = yield* Path.Path;
-    const sample = yield* fs.readFileString(
-      p.join(import.meta.dir, "sample.txt"),
-    );
-
-    return { sample };
-  }),
-  accessors: true,
-}) {}
+import { Array, Effect, Number, Option, String } from "effect";
+import { ProblemInput, Runtime } from "../utils";
 
 const isRangeInvalid = (range: string) =>
   Effect.gen(function* () {
@@ -50,7 +36,7 @@ const isRangeInvalid = (range: string) =>
   });
 
 const program = Effect.gen(function* () {
-  const input = yield* ProblemInput.sample;
+  const input = yield* ProblemInput.read("sample.txt", "day2");
   const ranges = Array.map(String.split(input, ","), (s) => String.trim(s));
 
   const sum = yield* Effect.reduce(ranges, 0, (acc, range) =>
@@ -59,8 +45,4 @@ const program = Effect.gen(function* () {
   console.log(sum);
 });
 
-const Dependencies = ProblemInput.Default.pipe(
-  Layer.provideMerge(BunContext.layer),
-);
-
-BunRuntime.runMain(program.pipe(Effect.provide(Dependencies)));
+Runtime.runPromise(program);
