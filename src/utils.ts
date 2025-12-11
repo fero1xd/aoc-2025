@@ -2,6 +2,20 @@ import { FileSystem, Path } from "@effect/platform";
 import { BunContext } from "@effect/platform-bun";
 import { Effect, Layer, ManagedRuntime } from "effect";
 
+type BuildTuple<N extends number, T extends any[] = []> = T["length"] extends N
+  ? T
+  : BuildTuple<N, [...T, unknown]>;
+
+type AddOne<N extends number> = [...BuildTuple<N>, unknown]["length"];
+
+type CountingUnion<
+  N extends number,
+  Acc extends any[] = [],
+  Out = never,
+> = Acc["length"] extends N
+  ? Out
+  : CountingUnion<N, [...Acc, unknown], Out | AddOne<Acc["length"]>>;
+
 export class ProblemInput extends Effect.Service<ProblemInput>()(
   "ProblemInput",
   {
@@ -11,7 +25,7 @@ export class ProblemInput extends Effect.Service<ProblemInput>()(
 
       const read = Effect.fnUntraced(function* (
         name: `${"sample" | "input"}.txt`,
-        day: `day${number}`,
+        day: `day${CountingUnion<25>}`,
       ) {
         return yield* fs.readFileString(p.join(import.meta.dir, day, name));
       });
