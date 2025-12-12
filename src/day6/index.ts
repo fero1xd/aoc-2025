@@ -2,7 +2,7 @@ import { Effect, String } from "effect";
 import { ProblemInput, Runtime } from "../utils";
 
 const program = Effect.gen(function* () {
-  const input = yield* ProblemInput.read("input.txt", "day6");
+  const input = yield* ProblemInput.read("sample.txt", "day6");
   const problems = input
     .trim()
     .split("\n")
