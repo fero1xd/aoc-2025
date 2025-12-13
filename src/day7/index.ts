@@ -1,0 +1,107 @@
+import {
+  Array,
+  Data,
+  Effect,
+  Equal,
+  HashSet,
+  MutableHashSet,
+  Option,
+  pipe,
+  Predicate,
+  Ref,
+  String,
+} from "effect";
+import { ProblemInput, Runtime } from "../utils";
+
+type Position = {
+  row: number;
+  col: number;
+};
+const Position = Data.case<Position>();
+
+function isTachyonBeam(str: string) {
+  return str === "S" || str === "|";
+}
+
+const program = Effect.gen(function* () {
+  const input = yield* ProblemInput.read("input.txt", "day7");
+  const manifold = input
+    .trim()
+    .split("\n")
+    .map(String.trim)
+    .map(String.split(""));
+
+  const width = manifold[0]!.length;
+
+  // Find beam location
+  let beamStart: Position | null = null;
+
+  for (let row = 0; row < manifold.length; row++) {
+    for (let col = 0; col < width; col++) {
+      if (
+        pipe(
+          manifold,
+          Array.get(row),
+          Option.getOrThrow,
+          Array.get(col),
+          Option.getOrThrow,
+          Equal.equals("S"),
+        )
+      ) {
+        beamStart = Position({
+          row,
+          col,
+        });
+        break;
+      }
+    }
+  }
+
+  if (Predicate.isNull(beamStart)) {
+    return yield* Effect.fail("No beam start pos found");
+  }
+
+  const splitCount = yield* Ref.make<number>(0);
+  const incrementSplitCount = Ref.updateAndGet(splitCount, (c) => c + 1);
+  const getSplitCount = Ref.get(splitCount);
+
+  for (let row = 0; row < manifold.length; row++) {
+    const newBeams = MutableHashSet.empty<Position>();
+
+    for (let col = 0; col < width; col++) {
+      const el = manifold[row]![col]!;
+      if (!isTachyonBeam(el)) continue;
+
+      // check if we are at the exit
+      if (row === manifold.length - 1) continue;
+
+      // Check for empty space below
+      if (manifold[row + 1]![col] === ".") {
+        newBeams.pipe(MutableHashSet.add(Position({ row: row + 1, col })));
+        continue;
+      }
+
+      // facing a splitter down
+      yield* incrementSplitCount;
+
+      if (col + 1 < width) {
+        newBeams.pipe(
+          MutableHashSet.add(Position({ row: row + 1, col: col + 1 })),
+        );
+      }
+      if (col - 1 >= 0) {
+        newBeams.pipe(
+          MutableHashSet.add(Position({ row: row + 1, col: col - 1 })),
+        );
+      }
+    }
+
+    for (const beam of newBeams) {
+      manifold[beam.row]![beam.col] = "|";
+    }
+  }
+
+  console.log({ splitCount: yield* Ref.get(splitCount) });
+});
+
+Runtime.runPromise(program);
