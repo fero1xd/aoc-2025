@@ -1,16 +1,4 @@
-import {
-  Array,
-  Data,
-  Effect,
-  Equal,
-  HashSet,
-  MutableHashSet,
-  Option,
-  pipe,
-  Predicate,
-  Ref,
-  String,
-} from "effect";
+import { Data, Effect, MutableHashSet, Ref, String } from "effect";
 import { ProblemInput, Runtime } from "../utils";
 
 type Position = {
@@ -24,7 +12,7 @@ function isTachyonBeam(str: string) {
 }
 
 const program = Effect.gen(function* () {
-  const input = yield* ProblemInput.read("input.txt", "day7");
+  const input = yield* ProblemInput.read("sample.txt", "day7");
   const manifold = input
     .trim()
     .split("\n")
@@ -32,35 +20,6 @@ const program = Effect.gen(function* () {
     .map(String.split(""));
 
   const width = manifold[0]!.length;
-
-  // Find beam location
-  let beamStart: Position | null = null;
-
-  for (let row = 0; row < manifold.length; row++) {
-    for (let col = 0; col < width; col++) {
-      if (
-        pipe(
-          manifold,
-          Array.get(row),
-          Option.getOrThrow,
-          Array.get(col),
-          Option.getOrThrow,
-          Equal.equals("S"),
-        )
-      ) {
-        beamStart = Position({
-          row,
-          col,
-        });
-        break;
-      }
-    }
-  }
-
-  if (Predicate.isNull(beamStart)) {
-    return yield* Effect.fail("No beam start pos found");
-  }
-
   const splitCount = yield* Ref.make<number>(0);
   const incrementSplitCount = Ref.updateAndGet(splitCount, (c) => c + 1);
   const getSplitCount = Ref.get(splitCount);
@@ -101,7 +60,7 @@ const program = Effect.gen(function* () {
     }
   }
 
-  console.log({ splitCount: yield* Ref.get(splitCount) });
+  console.log({ splitCount: yield* getSplitCount });
 });
 
 Runtime.runPromise(program);
