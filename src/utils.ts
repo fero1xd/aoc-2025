@@ -25,7 +25,7 @@ export class ProblemInput extends Effect.Service<ProblemInput>()(
 
       const read = Effect.fnUntraced(function* (
         name: `${"sample" | "input"}.txt`,
-        day: `day${CountingUnion<25>}`,
+        day: `day${CountingUnion<12>}`,
       ) {
         return yield* fs.readFileString(p.join(import.meta.dir, day, name));
       });
