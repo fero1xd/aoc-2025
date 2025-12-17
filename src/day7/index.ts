@@ -12,7 +12,7 @@ function isTachyonBeam(str: string) {
 }
 
 const program = Effect.gen(function* () {
-  const input = yield* ProblemInput.read("sample.txt", "day7");
+  const input = yield* ProblemInput.read("input.txt", "day7");
   const manifold = input
     .trim()
     .split("\n")
@@ -24,15 +24,12 @@ const program = Effect.gen(function* () {
   const incrementSplitCount = Ref.updateAndGet(splitCount, (c) => c + 1);
   const getSplitCount = Ref.get(splitCount);
 
-  for (let row = 0; row < manifold.length; row++) {
+  for (let row = 0; row < manifold.length - 1; row++) {
     const newBeams = MutableHashSet.empty<Position>();
 
     for (let col = 0; col < width; col++) {
       const el = manifold[row]![col]!;
       if (!isTachyonBeam(el)) continue;
-
-      // check if we are at the exit
-      if (row === manifold.length - 1) continue;
 
       // Check for empty space below
       if (manifold[row + 1]![col] === ".") {

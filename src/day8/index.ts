@@ -1,20 +1,14 @@
 import {
-  Array,
   Effect,
   Graph,
-  MutableHashMap,
-  HashMap,
+  MutableHashSet,
   Number,
   Option,
   ParseResult,
   Schema,
   String,
-  HashSet,
-  MutableHashSet,
-  Data,
 } from "effect";
 import { ProblemInput, Runtime } from "../utils";
-import { min } from "effect/Number";
 
 class Position extends Schema.TaggedClass<Position>()("Position", {
   x: Schema.Number,
